@@ -12,6 +12,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -51,6 +52,8 @@ public class FinanceView extends VerticalLayout {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
+        // Landmark utama halaman (aksesibilitas: landmark-one-main / region)
+        getElement().setAttribute("role", "main");
 
         configureGrid();
         configureToolbar();
@@ -60,21 +63,21 @@ public class FinanceView extends VerticalLayout {
 
     private HorizontalLayout buildSummary() {
         HorizontalLayout row = new HorizontalLayout(
-                card("Total Transaksi", totalCount, "#DBEAFE", "#1D4ED8"),
-                card("Total Pemasukan", incomeValue, "#DCFCE7", "#16A34A"),
-                card("Total Pengeluaran", expenseValue, "#FEE2E2", "#DC2626"),
-                card("Saldo", balanceValue, "#FEF3C7", "#D97706")
+                card("Total Transaksi", totalCount, "#DBEAFE", "#1D4ED8", "#1E3A8A"),
+                card("Total Pemasukan", incomeValue, "#DCFCE7", "#16A34A", "#14532D"),
+                card("Total Pengeluaran", expenseValue, "#FEE2E2", "#DC2626", "#7F1D1D"),
+                card("Saldo", balanceValue, "#FEF3C7", "#D97706", "#78350F")
         );
         row.setWidthFull();
         row.getStyle().set("align-items", "stretch");
         return row;
     }
 
-    private Div card(String label, Span value, String background, String accent) {
+    private Div card(String label, Span value, String background, String accent, String textColor) {
         Span caption = new Span(label);
-        caption.getStyle().set("display", "block").set("font-size", "0.875rem").set("color", accent);
+        caption.getStyle().set("display", "block").set("font-size", "0.875rem").set("color", textColor);
         value.getStyle().set("display", "block").set("font-size", "1.5rem")
-                .set("font-weight", "700").set("color", accent);
+                .set("font-weight", "700").set("color", textColor);
         Div card = new Div(caption, value);
         card.getStyle().set("flex", "1").set("min-width", "0").set("background", background)
                 .set("border-left", "6px solid " + accent).set("border-radius", "12px")
@@ -118,10 +121,12 @@ public class FinanceView extends VerticalLayout {
     }
 
     private void configureToolbar() {
+        searchField.setLabel("Cari keterangan");
         searchField.setPlaceholder("Cari keterangan...");
         searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
         searchField.setClearButtonVisible(true);
 
+        sortBox.setLabel("Urutkan");
         sortBox.setPlaceholder("Urutkan...");
         sortBox.setItems(SortOption.values());
         sortBox.setItemLabelGenerator(SortOption::label);
@@ -137,12 +142,15 @@ public class FinanceView extends VerticalLayout {
         Button search = new Button("Cari", VaadinIcon.SEARCH.create(), e -> searchTransactions());
         Button reload = new Button("Muat Ulang", VaadinIcon.REFRESH.create(), e -> refreshAll());
         Button income = new Button("Tambah Pemasukan", VaadinIcon.PLUS.create(), e -> openAddDialog(true));
-        income.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_PRIMARY);
+        income.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        // Hijau gelap agar kontras teks putih memenuhi WCAG AA (varian success bawaan kurang kontras)
+        income.getStyle().set("background", "#166534").set("color", "#FFFFFF");
         Button expense = new Button("Tambah Pengeluaran", VaadinIcon.MINUS.create(), e -> openAddDialog(false));
         expense.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY);
 
         HorizontalLayout bar = new HorizontalLayout(searchField, search, sortBox, reload, income, expense);
         bar.setWidthFull();
+        bar.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
         bar.setFlexGrow(1, searchField);
         return bar;
     }
